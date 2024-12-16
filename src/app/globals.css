@@ -4,6 +4,7 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  background-color: hsl(225deg 50% 98.43%);
 }
 
 @layer base {

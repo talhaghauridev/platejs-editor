@@ -1,60 +1,6 @@
 "use client";
 
-import { withProps } from "@udecode/cn";
-import { AIPlugin } from "@udecode/plate-ai/react";
-import {
-  BoldPlugin,
-  CodePlugin,
-  ItalicPlugin,
-  StrikethroughPlugin,
-  SubscriptPlugin,
-  SuperscriptPlugin,
-  UnderlinePlugin,
-} from "@udecode/plate-basic-marks/react";
-import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
-import {
-  CodeBlockPlugin,
-  CodeLinePlugin,
-  CodeSyntaxPlugin,
-} from "@udecode/plate-code-block/react";
-import { CommentsPlugin } from "@udecode/plate-comments/react";
-import {
-  ParagraphPlugin,
-  PlateLeaf,
-  usePlateEditor,
-} from "@udecode/plate-common/react";
-import { DatePlugin } from "@udecode/plate-date/react";
-import { EmojiInputPlugin } from "@udecode/plate-emoji/react";
-import { ExcalidrawPlugin } from "@udecode/plate-excalidraw/react";
-import { HEADING_KEYS } from "@udecode/plate-heading";
-import { TocPlugin } from "@udecode/plate-heading/react";
-import { HighlightPlugin } from "@udecode/plate-highlight/react";
-import { HorizontalRulePlugin } from "@udecode/plate-horizontal-rule/react";
-import { KbdPlugin } from "@udecode/plate-kbd/react";
-import { ColumnItemPlugin, ColumnPlugin } from "@udecode/plate-layout/react";
-import { LinkPlugin } from "@udecode/plate-link/react";
-import {
-  AudioPlugin,
-  FilePlugin,
-  ImagePlugin,
-  MediaEmbedPlugin,
-  PlaceholderPlugin,
-  VideoPlugin,
-} from "@udecode/plate-media/react";
-import {
-  MentionInputPlugin,
-  MentionPlugin,
-} from "@udecode/plate-mention/react";
-import { SlashInputPlugin } from "@udecode/plate-slash-command/react";
-import {
-  TableCellHeaderPlugin,
-  TableCellPlugin,
-  TablePlugin,
-  TableRowPlugin,
-} from "@udecode/plate-table/react";
-import { TogglePlugin } from "@udecode/plate-toggle/react";
-
-import { copilotPlugins } from "@/components/editor/plugins/copilot-plugins";
+import { commentsPlugin } from "@/components/editor/plugins/comments-plugin";
 import { editorPlugins } from "@/components/editor/plugins/editor-plugins";
 import { FixedToolbarPlugin } from "@/components/editor/plugins/fixed-toolbar-plugin";
 import { FloatingToolbarPlugin } from "@/components/editor/plugins/floating-toolbar-plugin";
@@ -95,19 +41,73 @@ import { TableRowElement } from "@/components/plate-ui/table-row-element";
 import { TocElement } from "@/components/plate-ui/toc-element";
 import { ToggleElement } from "@/components/plate-ui/toggle-element";
 import { withDraggables } from "@/components/plate-ui/with-draggables";
-import { SlateEditor } from "@udecode/plate-common";
-import { deserializeMd } from "@udecode/plate-markdown";
-import remarkEmoji from "remark-emoji";
+import { withProps } from "@udecode/cn";
+import { AIPlugin } from "@udecode/plate-ai/react";
 import {
-  useState,
-  useEffect,
+  BoldPlugin,
+  CodePlugin,
+  ItalicPlugin,
+  StrikethroughPlugin,
+  SubscriptPlugin,
+  SuperscriptPlugin,
+  UnderlinePlugin,
+} from "@udecode/plate-basic-marks/react";
+import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
+import {
+  CodeBlockPlugin,
+  CodeLinePlugin,
+  CodeSyntaxPlugin,
+} from "@udecode/plate-code-block/react";
+import { CommentsPlugin } from "@udecode/plate-comments/react";
+import { SlateEditor } from "@udecode/plate-common";
+import {
+  ParagraphPlugin,
+  PlateLeaf,
+  usePlateEditor,
+} from "@udecode/plate-common/react";
+import { DatePlugin } from "@udecode/plate-date/react";
+import { EmojiInputPlugin } from "@udecode/plate-emoji/react";
+import { ExcalidrawPlugin } from "@udecode/plate-excalidraw/react";
+import { HEADING_KEYS } from "@udecode/plate-heading";
+import { TocPlugin } from "@udecode/plate-heading/react";
+import { HighlightPlugin } from "@udecode/plate-highlight/react";
+import { HorizontalRulePlugin } from "@udecode/plate-horizontal-rule/react";
+import { KbdPlugin } from "@udecode/plate-kbd/react";
+import { ColumnItemPlugin, ColumnPlugin } from "@udecode/plate-layout/react";
+import { LinkPlugin } from "@udecode/plate-link/react";
+import { deserializeMd } from "@udecode/plate-markdown";
+import {
+  AudioPlugin,
+  FilePlugin,
+  ImagePlugin,
+  MediaEmbedPlugin,
+  PlaceholderPlugin,
+  VideoPlugin,
+} from "@udecode/plate-media/react";
+import {
+  MentionInputPlugin,
+  MentionPlugin,
+} from "@udecode/plate-mention/react";
+import { SlashInputPlugin } from "@udecode/plate-slash-command/react";
+import {
+  TableCellHeaderPlugin,
+  TableCellPlugin,
+  TablePlugin,
+  TableRowPlugin,
+} from "@udecode/plate-table/react";
+import { TogglePlugin } from "@udecode/plate-toggle/react";
+import {
   createContext,
+  Dispatch,
   ReactNode,
-  useContext,
+  SetStateAction,
   useCallback,
+  useContext,
+  useEffect,
   useRef,
+  useState,
 } from "react";
-import { commentsPlugin } from "@/components/editor/plugins/comments-plugin";
+import remarkEmoji from "remark-emoji";
 interface PageContent {
   content: string;
   pageNumber: number;
@@ -122,9 +122,121 @@ interface GlobalContextType {
   handleNextPage: () => void;
   currentPage: number;
   editor: any;
+  setCurrentPage: Dispatch<SetStateAction<number>>;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
+
+const defaultContent = `# Welcome to the Markdown Editor
+## Features
+- **Bold text** and *italic text*
+- Lists and checkboxes
+  - [x] First task completed
+  - [ ] Second task pending
+- Code blocks
+
+### Code Example
+\`\`\`javascript
+function hello() {
+  console.log("Hello World!");
+}
+\`\`\`
+
+> This is a blockquote with a [link](https://example.com)
+
+1. Ordered lists
+2. Are also supported
+3. With multiple items
+
+---
+
+| Tables | Are | Cool |
+|--------|-----|------|
+| col 1  | col 2 | col 3 |
+| data   | more | stuff |
+# Welcome to the Markdown Editor
+## Features
+- **Bold text** and *italic text*
+- Lists and checkboxes
+  - [x] First task completed
+  - [ ] Second task pending
+- Code blocks
+
+### Code Example
+\`\`\`javascript
+function hello() {
+  console.log("Hello World!");
+}
+\`\`\`
+
+> This is a blockquote with a [link](https://example.com)
+
+1. Ordered lists
+2. Are also supported
+3. With multiple items
+
+---
+
+| Tables | Are | Cool |
+|--------|-----|------|
+| col 1  | col 2 | col 3 |
+| data   | more | stuff |
+# Welcome to the Markdown Editor
+## Features
+- **Bold text** and *italic text*
+- Lists and checkboxes
+  - [x] First task completed
+  - [ ] Second task pending
+- Code blocks
+
+### Code Example
+\`\`\`javascript
+function hello() {
+  console.log("Hello World!");
+}
+\`\`\`
+
+> This is a blockquote with a [link](https://example.com)
+
+1. Ordered lists
+2. Are also supported
+3. With multiple items
+
+---
+
+| Tables | Are | Cool |
+|--------|-----|------|
+| col 1  | col 2 | col 3 |
+| data   | more | stuff |
+
+
+
+
+
+This is a **live demo** of MDXEditor with all default features on.
+
+> The overriding design goal for Markdown’s formatting syntax is to make it as readable as possible.
+> The idea is that a Markdown-formatted document should be publishable as-is, as plain text,
+> without looking like it’s been marked up with tags or formatting instructions.
+
+[— Daring Fireball](https://daringfireball.net/projects/markdown/).
+
+In here, you can find the following markdown elements:
+
+* Headings
+* Lists
+  * Unordered
+  * Ordered
+  * Check lists
+  * And nested ;)
+* Links
+* Bold/Italic/Underline formatting
+* Tables
+* Code block editors
+* And much more.
+
+
+`;
 
 export function GlobalContextProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState("");
@@ -132,10 +244,13 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [editorContent, setEditorContent] = useState("");
-  const contentRef = useRef(content);
-  const pagesRef = useRef(pages);
-  const isProcessingRef = useRef(false);
-  const isNavigatingRef = useRef(false);
+  // Add ref to track initial content processing
+  const initialContentProcessedRef = useRef(false);
+  const initializedRef = useRef(false);
+  const processingRef = useRef(false);
+  const pagesRef = useRef<PageContent[]>([]);
+  const lastProcessedContentRef = useRef("");
+
   const editor = usePlateEditor({
     override: {
       components: withDraggables(
@@ -204,51 +319,142 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
         : undefined,
   });
 
-  // Split content into pages with stable logic
+  useEffect(() => {
+    if (!initialContentProcessedRef.current && editor?.api?.markdown) {
+      initialContentProcessedRef.current = true;
+      processContent(defaultContent, true);
+    }
+  }, [editor?.api?.markdown]);
+
+  const splitContentIntoPages = useCallback((markdownContent: string) => {
+    const MAX_LENGTH = 500;
+    const newPages: PageContent[] = [];
+    let currentPageContent = "";
+    let currentPageNumber = 1;
+
+    // First try to split by main headers
+    const mainSections = markdownContent.split(/(?=# (?!#))/g).filter(Boolean);
+
+    if (mainSections.length > 1) {
+      // If we have header-based sections, use them as primary split points
+      mainSections.forEach((section) => {
+        if (
+          (currentPageContent + section).length > MAX_LENGTH &&
+          currentPageContent
+        ) {
+          newPages.push({
+            content: currentPageContent.trim(),
+            pageNumber: currentPageNumber++,
+          });
+          currentPageContent = section;
+        } else {
+          currentPageContent += section;
+        }
+      });
+    } else {
+      // If no headers or just one section, split by paragraphs
+      const paragraphs = markdownContent.split(/\n\n+/).filter(Boolean);
+
+      paragraphs.forEach((paragraph) => {
+        // Handle special cases like code blocks
+        const isCodeBlock = paragraph.startsWith("```");
+        const isList = paragraph.match(/^[-*+]\s|^\d+\.\s/m);
+        const shouldKeepTogether = isCodeBlock || isList;
+
+        if (shouldKeepTogether) {
+          // If this is a code block or list, try to keep it together on one page
+          if (
+            currentPageContent &&
+            (currentPageContent + paragraph).length > MAX_LENGTH
+          ) {
+            newPages.push({
+              content: currentPageContent.trim(),
+              pageNumber: currentPageNumber++,
+            });
+            currentPageContent = paragraph;
+          } else {
+            currentPageContent +=
+              (currentPageContent ? "\n\n" : "") + paragraph;
+          }
+        } else {
+          // Regular paragraph handling
+          if (
+            (currentPageContent + paragraph).length > MAX_LENGTH &&
+            currentPageContent
+          ) {
+            // Check if paragraph itself is too long
+            if (paragraph.length > MAX_LENGTH) {
+              // Split long paragraph at sentence boundaries or by length
+              const sentences = paragraph.match(/[^.!?]+[.!?]+/g) || [
+                paragraph,
+              ];
+              sentences.forEach((sentence) => {
+                if (
+                  (currentPageContent + sentence).length > MAX_LENGTH &&
+                  currentPageContent
+                ) {
+                  newPages.push({
+                    content: currentPageContent.trim(),
+                    pageNumber: currentPageNumber++,
+                  });
+                  currentPageContent = sentence;
+                } else {
+                  currentPageContent +=
+                    (currentPageContent ? " " : "") + sentence;
+                }
+              });
+            } else {
+              // Normal paragraph
+              newPages.push({
+                content: currentPageContent.trim(),
+                pageNumber: currentPageNumber++,
+              });
+              currentPageContent = paragraph;
+            }
+          } else {
+            currentPageContent +=
+              (currentPageContent ? "\n\n" : "") + paragraph;
+          }
+        }
+      });
+    }
+
+    // Add the last page if there's content
+    if (currentPageContent) {
+      newPages.push({
+        content: currentPageContent.trim(),
+        pageNumber: currentPageNumber,
+      });
+    }
+
+    // Ensure we have at least one page
+    if (newPages.length === 0 && markdownContent.trim()) {
+      newPages.push({
+        content: markdownContent.trim(),
+        pageNumber: 1,
+      });
+    }
+
+    return newPages;
+  }, []);
+
+  // Process content with improved splitting
   const processContent = useCallback(
-    (markdownContent: string) => {
-      if (isProcessingRef.current || contentRef.current === markdownContent) {
+    (markdownContent: string, force = false) => {
+      if (
+        processingRef.current ||
+        (!force && lastProcessedContentRef.current === markdownContent)
+      ) {
         return;
       }
 
-      isProcessingRef.current = true;
-      contentRef.current = markdownContent;
+      processingRef.current = true;
 
       try {
-        // Split content by headers
-        const sections = markdownContent.split(/(?=# )/g).filter(Boolean);
-        const newPages: PageContent[] = [];
-        let currentContent = "";
-        const MAX_LENGTH = 500;
+        // Split content into pages
+        const newPages = splitContentIntoPages(markdownContent);
 
-        // Process sections into pages
-        for (let i = 0; i < sections.length; i++) {
-          const section = sections[i];
-
-          // If adding this section would exceed MAX_LENGTH, create a new page
-          if (
-            (currentContent + section).length > MAX_LENGTH &&
-            currentContent
-          ) {
-            newPages.push({
-              content: currentContent.trim(),
-              pageNumber: newPages.length + 1,
-            });
-            currentContent = section;
-          } else {
-            currentContent += section;
-          }
-
-          // Add remaining content as the last page
-          if (i === sections.length - 1 && currentContent) {
-            newPages.push({
-              content: currentContent.trim(),
-              pageNumber: newPages.length + 1,
-            });
-          }
-        }
-
-        // Ensure at least one page exists
+        // Validate pages
         if (newPages.length === 0 && markdownContent.trim()) {
           newPages.push({
             content: markdownContent.trim(),
@@ -256,51 +462,66 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
           });
         }
 
-        // Update pages state and ref
+        // Debug log each page's content
+        console.log(
+          "Page contents:",
+          newPages.map((page) => ({
+            pageNumber: page.pageNumber,
+            contentPreview: page.content.substring(0, 50) + "...",
+            length: page.content.length,
+          }))
+        );
+
+        // Update state and refs
         pagesRef.current = newPages;
+        lastProcessedContentRef.current = markdownContent;
         setPages(newPages);
 
-        // Set initial page content if needed
-        if (!editorContent && newPages.length > 0) {
+        // Set initial content if needed
+        if (!initializedRef.current && newPages.length > 0) {
           setEditorContent(newPages[0].content);
+          initializedRef.current = true;
         }
 
         console.log("Content processed:", {
           totalPages: newPages.length,
           currentPage,
-          sections: sections.length,
+          sections: newPages.length,
         });
       } catch (error) {
         console.error("Error processing content:", error);
       } finally {
-        isProcessingRef.current = false;
+        processingRef.current = false;
       }
     },
-    [editorContent]
+    [currentPage, splitContentIntoPages]
   );
 
-  // Handle editor content changes
+  // Handle initial content setting
   useEffect(() => {
-    if (!editor?.api?.markdown || isNavigatingRef.current) return;
+    if (
+      !editor?.api?.markdown ||
+      processingRef.current ||
+      initializedRef.current
+    )
+      return;
 
     const markdownContent = editor.api.markdown.serialize();
-    if (markdownContent !== contentRef.current) {
+    if (
+      markdownContent &&
+      markdownContent !== lastProcessedContentRef.current
+    ) {
       setContent(markdownContent);
-      processContent(markdownContent);
+      processContent(markdownContent, true);
     }
   }, [editor?.children, processContent]);
 
-  // Update editor content when page changes
+  // Handle page navigation
   useEffect(() => {
-    if (!pagesRef.current.length || isProcessingRef.current) return;
+    if (!pagesRef.current.length) return;
 
     const pageData = pagesRef.current.find((p) => p.pageNumber === currentPage);
-    if (!pageData) {
-      console.warn("Invalid page:", currentPage);
-      return;
-    }
-
-    isNavigatingRef.current = true;
+    if (!pageData) return;
 
     try {
       if (editor) {
@@ -316,8 +537,6 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("Error updating page:", error);
-    } finally {
-      isNavigatingRef.current = false;
     }
   }, [currentPage, editor]);
 
@@ -334,9 +553,6 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
       });
     }
   }, [currentPage]);
-  console.log({
-    pages,
-  });
 
   const handlePrevPage = useCallback(() => {
     if (currentPage > 1) {
@@ -359,9 +575,54 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
     currentPage,
     currentPageContent: editorContent,
     totalPages: pagesRef.current.length,
+    setCurrentPage,
     handleNextPage,
     handlePrevPage,
-    setContent,
+    setContent: useCallback(
+      (newContent: string) => {
+        // Update only the current page's content
+        if (pagesRef.current.length > 0) {
+          const updatedPages = pagesRef.current.map((page) => {
+            if (page.pageNumber === currentPage) {
+              return {
+                ...page,
+                content: newContent,
+              };
+            }
+            return page;
+          });
+
+          // Update pages state and ref
+          pagesRef.current = updatedPages;
+          setPages(updatedPages);
+
+          // Update editor content
+          if (editor && editor.api?.markdown) {
+            editor.children = editor.api.markdown.deserialize(newContent);
+            editor.onChange();
+          }
+
+          // Update current page content
+          setEditorContent(newContent);
+
+          // Update the overall content by joining all pages
+          const fullContent = updatedPages
+            .sort((a, b) => a.pageNumber - b.pageNumber)
+            .map((page) => page.content)
+            .join("\n\n");
+
+          console.log({
+            fullContent,
+          });
+
+          setContent(fullContent);
+        } else {
+          // If no pages exist, process the content normally
+          processContent(newContent, true);
+        }
+      },
+      [currentPage, editor, processContent]
+    ),
   };
 
   return (
@@ -370,7 +631,6 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
     </GlobalContext.Provider>
   );
 }
-
 export function useGlobalContext() {
   const context = useContext(GlobalContext);
   if (!context) {
